@@ -13,85 +13,111 @@ import java.util.stream.Collectors;
 @Service
 public class TransactionServiceImpl implements TransactionService {
 
-    private final TransactionRepository repository;
+    private final TransactionRepository transactionRepository;
 
-    public TransactionServiceImpl(TransactionRepository repository) {
-        this.repository = repository;
+    public TransactionServiceImpl(TransactionRepository transactionRepository) {
+        this.transactionRepository = transactionRepository;
     }
 
-    private TransactionResponseDTO mapToDTO(Transaction t) {
+    private TransactionResponseDTO mapToResponse(Transaction transaction) {
         TransactionResponseDTO dto = new TransactionResponseDTO();
-        dto.setTransactionId(t.getTransactionId());
-        dto.setUserId(t.getUserId());
-        dto.setCategoryId(t.getCategoryId());
-        dto.setBudgetId(t.getBudgetId());
-        dto.setAccountId(t.getAccountId());
-        dto.setAmount(t.getAmount());
-        dto.setTransactionDate(t.getTransactionDate());
-        dto.setDescription(t.getDescription());
-        dto.setMerchantName(t.getMerchantName());
+        dto.setTxnId(transaction.getTxnId());
+        dto.setUserId(transaction.getUserId());
+        dto.setCategoryId(transaction.getCategoryId());
+        dto.setBudgetId(transaction.getBudgetId());
+        dto.setAccountId(transaction.getAccountId());
+        dto.setUpiRefId(transaction.getUpiRefId());
+        dto.setRecipientId(transaction.getRecipientId());
+        dto.setAmount(transaction.getAmount());
+        dto.setTxnType(transaction.getTxnType());
+        dto.setTxnStatus(transaction.getTxnStatus());
+        dto.setTxnDate(transaction.getTxnDate());
+        dto.setTxnChannel(transaction.getTxnChannel());
+        dto.setRewardsEarned(transaction.getRewardsEarned());
+        dto.setMerchantName(transaction.getMerchantName());
+        dto.setDescription(transaction.getDescription());
         return dto;
     }
 
-    private Transaction mapToEntity(TransactionRequestDTO request) {
-        Transaction t = new Transaction();
-        t.setUserId(request.getUserId());
-        t.setCategoryId(request.getCategoryId());
-        t.setBudgetId(request.getBudgetId());
-        t.setAccountId(request.getAccountId());
-        t.setAmount(request.getAmount());
-        t.setTransactionDate(request.getTransactionDate());
-        t.setDescription(request.getDescription());
-        t.setMerchantName(request.getMerchantName());
-        return t;
+    private Transaction mapToEntity(TransactionRequestDTO dto) {
+        Transaction transaction = new Transaction();
+        transaction.setUserId(dto.getUserId());
+        transaction.setCategoryId(dto.getCategoryId());
+        transaction.setBudgetId(dto.getBudgetId());
+        transaction.setAccountId(dto.getAccountId());
+        transaction.setUpiRefId(dto.getUpiRefId());
+        transaction.setRecipientId(dto.getRecipientId());
+        transaction.setAmount(dto.getAmount());
+        transaction.setTxnType(dto.getTxnType());
+        transaction.setTxnStatus(dto.getTxnStatus());
+        transaction.setTxnDate(dto.getTxnDate());
+        transaction.setTxnChannel(dto.getTxnChannel());
+        transaction.setRewardsEarned(dto.getRewardsEarned());
+        transaction.setMerchantName(dto.getMerchantName());
+        transaction.setDescription(dto.getDescription());
+        return transaction;
     }
 
     @Override
-    public TransactionResponseDTO createTransaction(TransactionRequestDTO request) {
-        Transaction t = repository.save(mapToEntity(request));
-        return mapToDTO(t);
+    public TransactionResponseDTO createTransaction(TransactionRequestDTO dto) {
+        Transaction transaction = mapToEntity(dto);
+        return mapToResponse(transactionRepository.save(transaction));
+    }
+
+    @Override
+    public TransactionResponseDTO getTransactionById(Long txnId) {
+        return transactionRepository.findById(txnId)
+                .map(this::mapToResponse)
+                .orElse(null);
     }
 
     @Override
     public List<TransactionResponseDTO> getAllTransactions() {
-        return repository.findAll().stream().map(this::mapToDTO).collect(Collectors.toList());
+        return transactionRepository.findAll()
+                .stream().map(this::mapToResponse).collect(Collectors.toList());
     }
 
     @Override
-    public TransactionResponseDTO getTransactionById(Long id) {
-        return repository.findById(id).map(this::mapToDTO)
-                .orElseThrow(() -> new RuntimeException("Transaction not found with id " + id));
+    public List<TransactionResponseDTO> getTransactionsByUserId(String userId) {
+        return transactionRepository.findByUserId(userId)
+                .stream().map(this::mapToResponse).collect(Collectors.toList());
     }
 
     @Override
-    public List<TransactionResponseDTO> getTransactionsByUser(Long userId) {
-        return repository.findByUserId(userId).stream().map(this::mapToDTO).collect(Collectors.toList());
+    public List<TransactionResponseDTO> getTransactionsByCategoryId(String categoryId) {
+        return transactionRepository.findByCategoryId(categoryId)
+                .stream().map(this::mapToResponse).collect(Collectors.toList());
     }
 
     @Override
-    public List<TransactionResponseDTO> getTransactionsByCategory(Long categoryId) {
-        return repository.findByCategoryId(categoryId).stream().map(this::mapToDTO).collect(Collectors.toList());
+    public List<TransactionResponseDTO> getTransactionsByUserAndCategory(String userId, String categoryId) {
+        return transactionRepository.findByUserIdAndCategoryId(userId, categoryId)
+                .stream().map(this::mapToResponse).collect(Collectors.toList());
     }
 
     @Override
-    public TransactionResponseDTO updateTransaction(Long id, TransactionRequestDTO request) {
-        Transaction t = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Transaction not found with id " + id));
-
-        t.setUserId(request.getUserId());
-        t.setCategoryId(request.getCategoryId());
-        t.setBudgetId(request.getBudgetId());
-        t.setAccountId(request.getAccountId());
-        t.setAmount(request.getAmount());
-        t.setTransactionDate(request.getTransactionDate());
-        t.setDescription(request.getDescription());
-        t.setMerchantName(request.getMerchantName());
-
-        return mapToDTO(repository.save(t));
+    public TransactionResponseDTO updateTransaction(Long txnId, TransactionRequestDTO dto) {
+        return transactionRepository.findById(txnId).map(existing -> {
+            existing.setUserId(dto.getUserId());
+            existing.setCategoryId(dto.getCategoryId());
+            existing.setBudgetId(dto.getBudgetId());
+            existing.setAccountId(dto.getAccountId());
+            existing.setUpiRefId(dto.getUpiRefId());
+            existing.setRecipientId(dto.getRecipientId());
+            existing.setAmount(dto.getAmount());
+            existing.setTxnType(dto.getTxnType());
+            existing.setTxnStatus(dto.getTxnStatus());
+            existing.setTxnDate(dto.getTxnDate());
+            existing.setTxnChannel(dto.getTxnChannel());
+            existing.setRewardsEarned(dto.getRewardsEarned());
+            existing.setMerchantName(dto.getMerchantName());
+            existing.setDescription(dto.getDescription());
+            return mapToResponse(transactionRepository.save(existing));
+        }).orElse(null);
     }
 
     @Override
-    public void deleteTransaction(Long id) {
-        repository.deleteById(id);
+    public void deleteTransaction(Long txnId) {
+        transactionRepository.deleteById(txnId);
     }
 }

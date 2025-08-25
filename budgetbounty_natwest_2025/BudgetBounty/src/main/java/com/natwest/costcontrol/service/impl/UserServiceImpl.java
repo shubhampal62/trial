@@ -19,56 +19,62 @@ public class UserServiceImpl implements UserService {
         this.userRepository = userRepository;
     }
 
-    @Override
-    public UserResponseDTO createUser(UserRequestDTO userRequestDTO) {
-        User user = new User();
-        user.setUsername(userRequestDTO.getUsername());
-        user.setEmail(userRequestDTO.getEmail());
-        user.setFirstName(userRequestDTO.getFirstName());
-        user.setLastName(userRequestDTO.getLastName());
-        User saved = userRepository.save(user);
+    private UserResponseDTO mapToResponse(User user) {
+        UserResponseDTO dto = new UserResponseDTO();
+        dto.setUserId(user.getUserId());
+        dto.setName(user.getName());
+        dto.setEmail(user.getEmail());
+        dto.setRegisteredAt(user.getRegisteredAt());
+        dto.setPan(user.getPan());
+        dto.setAppAdmin(user.isAppAdmin());
+        dto.setPoints(user.getPoints());
+        return dto;
+    }
 
-        return toDTO(saved);
+    @Override
+    public UserResponseDTO createUser(UserRequestDTO dto) {
+        User user = new User();
+        user.setName(dto.getName());
+        user.setEmail(dto.getEmail());
+        user.setPassword(dto.getPassword());
+        user.setRegisteredAt(dto.getRegisteredAt());
+        user.setPan(dto.getPan());
+        user.setAppAdmin(dto.isAppAdmin());
+        user.setPoints(dto.getPoints());
+
+        return mapToResponse(userRepository.save(user));
     }
 
     @Override
     public UserResponseDTO getUserById(Long id) {
         return userRepository.findById(id)
-                .map(this::toDTO)
+                .map(this::mapToResponse)
                 .orElseThrow(() -> new RuntimeException("User not found with id " + id));
     }
 
     @Override
     public List<UserResponseDTO> getAllUsers() {
-        return userRepository.findAll()
-                .stream().map(this::toDTO)
-                .collect(Collectors.toList());
+        return userRepository.findAll().stream().map(this::mapToResponse).collect(Collectors.toList());
     }
 
     @Override
     public UserResponseDTO updateUser(Long id, UserRequestDTO dto) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with id " + id));
-        user.setUsername(dto.getUsername());
-        user.setEmail(dto.getEmail());
-        user.setFirstName(dto.getFirstName());
-        user.setLastName(dto.getLastName());
 
-        return toDTO(userRepository.save(user));
+        user.setName(dto.getName());
+        user.setEmail(dto.getEmail());
+        user.setPassword(dto.getPassword());
+        user.setRegisteredAt(dto.getRegisteredAt());
+        user.setPan(dto.getPan());
+        user.setAppAdmin(dto.isAppAdmin());
+        user.setPoints(dto.getPoints());
+
+        return mapToResponse(userRepository.save(user));
     }
 
     @Override
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
-    }
-
-    private UserResponseDTO toDTO(User user) {
-        UserResponseDTO dto = new UserResponseDTO();
-        dto.setUserId(user.getUserId());
-        dto.setUsername(user.getUsername());
-        dto.setEmail(user.getEmail());
-        dto.setFirstName(user.getFirstName());
-        dto.setLastName(user.getLastName());
-        return dto;
     }
 }

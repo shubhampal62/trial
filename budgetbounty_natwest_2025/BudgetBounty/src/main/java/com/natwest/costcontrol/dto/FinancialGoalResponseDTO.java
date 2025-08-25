@@ -17,6 +17,24 @@ public class FinancialGoalResponseDTO {
 	private Boolean isAchieved;
 	private String domain;
 	
+	public FinancialGoalResponseDTO() {
+		
+	}
+	
+	 public FinancialGoalResponseDTO(String goalId, String userId, String goalName, GoalType goalType,
+             BigDecimal targetAmount, BigDecimal currentAmount, LocalDate targetDate,
+             Boolean isAchieved, String domain) {
+this.goalId = goalId;
+this.userId = userId;
+this.goalName = goalName;
+this.goalType = goalType;
+this.targetAmount = targetAmount;
+this.currentAmount = currentAmount;
+this.targetDate = targetDate;
+this.isAchieved = isAchieved;
+this.domain = domain;
+}
+	
 	
 	//Getters and Setters
 	

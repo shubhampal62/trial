@@ -6,9 +6,9 @@ import com.natwest.costcontrol.dto.UserResponseDTO;
 import java.util.List;
 
 public interface UserService {
-    UserResponseDTO createUser(UserRequestDTO userRequestDTO);
+    UserResponseDTO createUser(UserRequestDTO dto);
     UserResponseDTO getUserById(Long id);
     List<UserResponseDTO> getAllUsers();
-    UserResponseDTO updateUser(Long id, UserRequestDTO userRequestDTO);
+    UserResponseDTO updateUser(Long id, UserRequestDTO dto);
     void deleteUser(Long id);
 }

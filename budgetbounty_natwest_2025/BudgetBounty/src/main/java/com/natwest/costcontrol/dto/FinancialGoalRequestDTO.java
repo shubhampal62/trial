@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import com.natwest.costcontrol.model.FinancialGoal.GoalType;
 
 public class FinancialGoalRequestDTO {
+	private String goalId;
 	private String userId;
 	private String goalName;
 	private GoalType goalType;
@@ -71,6 +72,12 @@ public class FinancialGoalRequestDTO {
 	}
 	public void setDomain(String domain) {
 		this.domain = domain;
+	}
+	public String getGoalId() {
+		return goalId;
+	}
+	public void setGoalId(String goalId) {
+		this.goalId = goalId;
 	}
 	
 	
